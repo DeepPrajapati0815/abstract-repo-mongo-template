@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { AbstractDocument } from "src/common/abstract.schema";
+import { AbstractDocument } from "src/common/abstract/abstract.schema";
 
 @Schema({ timestamps: true })
 export class Role extends AbstractDocument {

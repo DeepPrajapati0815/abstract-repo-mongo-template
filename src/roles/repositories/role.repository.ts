@@ -2,9 +2,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { AbstractRepository } from "src/common/abstract.repository";
+import { AbstractRepository } from "src/common/abstract/abstract.repository";
 import { Role } from "../schemas/role.schema";
-import { RepositoryRegistryService } from "src/common/repository-registry.service";
+import { RepositoryRegistryService } from "src/common/abstract/repository-registry.service";
 import { Cascade } from "src/common/decorators/cascade.decorator";
 
 @Injectable()

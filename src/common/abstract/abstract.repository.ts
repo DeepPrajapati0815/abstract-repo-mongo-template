@@ -6,13 +6,13 @@ import mongoose, {
   UpdateQuery,
   Types,
 } from "mongoose";
-import { AbstractDocument } from "./abstract.schema";
-import { PaginationDto } from "./pagination.dto";
+import { AbstractDocument } from "../abstract/abstract.schema";
+import { PaginationDto } from "../pagination.dto";
 import { RepositoryRegistryService } from "./repository-registry.service";
 import {
   getCascadeDeleteMeta,
   CascadeDeleteConfig,
-} from "./decorators/cascade.decorator";
+} from "../decorators/cascade.decorator";
 
 export abstract class AbstractRepository<T extends AbstractDocument> {
   protected modelName: string;
@@ -20,12 +20,12 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
 
   constructor(
     protected readonly model: Model<T>,
-    protected readonly registry: RepositoryRegistryService,
+    protected readonly registry: RepositoryRegistryService
   ) {
     this.modelName = model.modelName.toLowerCase();
     this.registry.register(
       this.constructor.name,
-      this as unknown as AbstractRepository<AbstractDocument>,
+      this as unknown as AbstractRepository<AbstractDocument>
     );
     this.cascadeConfig = getCascadeDeleteMeta(this.constructor);
   }
@@ -36,14 +36,14 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
 
   async findOne(
     filter: FilterQuery<T>,
-    options?: QueryOptions,
+    options?: QueryOptions
   ): Promise<T | null> {
     return this.model.findOne({ ...filter, isDeleted: false }, options).exec();
   }
 
   async findAll(
     filter: FilterQuery<T> = {},
-    pagination: PaginationDto = {},
+    pagination: PaginationDto = {}
   ): Promise<{
     data: T[];
     currentPage: number;
@@ -77,7 +77,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
 
   async aggregateFindAll(
     pipeline: Record<string, any>[] = [],
-    pagination: PaginationDto = {},
+    pagination: PaginationDto = {}
   ): Promise<{
     data: T[];
     currentPage: number;
@@ -139,7 +139,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
 
   async update(
     filter: FilterQuery<T>,
-    update: UpdateQuery<T>,
+    update: UpdateQuery<T>
   ): Promise<T | null> {
     return this.model.findOneAndUpdate(filter, update, { new: true }).exec();
   }
@@ -187,7 +187,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
     await this.model
       .updateMany(
         { _id: { $in: ids } },
-        { isDeleted: true, deletedAt: new Date() },
+        { isDeleted: true, deletedAt: new Date() }
       )
       .exec();
 
@@ -226,7 +226,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
 
   private async handleCascadeRestore(
     filter: Record<string, any>,
-    visited = new Set<string>(), // track visited doc IDs
+    visited = new Set<string>() // track visited doc IDs
   ) {
     const cascades = getCascadeDeleteMeta(this.constructor);
 
@@ -255,7 +255,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
   }
 
   private async findIds(
-    filter: Record<string, any>,
+    filter: Record<string, any>
   ): Promise<Types.ObjectId[]> {
     const docs = await this.model.find(filter, { _id: 1 }).lean();
     return docs.map((d: any) => d._id);
@@ -263,7 +263,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
 
   async restore(
     filter: FilterQuery<T>,
-    visited = new Set<string>(),
+    visited = new Set<string>()
   ): Promise<void> {
     const docs = await this.model.find(filter).select("_id").lean();
 
@@ -275,7 +275,7 @@ export abstract class AbstractRepository<T extends AbstractDocument> {
 
     await this.model.updateMany(
       { _id: { $in: idsToRestore } },
-      { isDeleted: false, deletedAt: null },
+      { isDeleted: false, deletedAt: null }
     );
 
     for (const id of idsToRestore) {
